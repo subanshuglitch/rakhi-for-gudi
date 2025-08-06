@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gudi’s Rakhi Gift 🎁</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #ffdae0, #fbc2eb);
+    }
+
+    #gameArea {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .gift {
+      width: 60px;
+      height: 60px;
+      background-image: url('https://cdn-icons-png.flaticon.com/512/6453/6453565.png');
+      background-size: cover;
+      position: absolute;
+      animation: drop 3s linear;
+      cursor: pointer;
+    }
+
+    @keyframes drop {
+      0% {
+        top: -80px;
+        opacity: 1;
+      }
+      100% {
+        top: 100vh;
+        opacity: 0;
+      }
+    }
+
+    #scoreBoard {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+
+    #messageBox {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.8rem;
+      background: #fff0f5;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 999;
+      text-align: center;
+    }
+
+    #giftForm {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      text-align: center;
+      z-index: 999;
+    }
+
+    #giftForm input {
+      padding: 10px;
+      width: 90%;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    #giftForm button {
+      padding: 10px 20px;
+      background: #d6336c;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  #goalMessage {
+  margin-top: 8px;
+  font-size: 1rem;
+  color: #d6336c;
+  font-weight: 600;
+}
+@media (max-width: 600px) {
+  .gift {
+    width: 80px;
+    height: 80px;
+    background-size: contain;
+  }
+}
+#restartBtn {
+  padding: 12px 24px;
+  background: #6a5acd;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+#restartBtn:hover {
+  transform: scale(1.05);
+}
+
+  </style>
+</head>
+<body>
+
+  <div id="gameArea">
+    <div id="scoreBoard">
+  🎯 Score: <span id="score">0</span> | ⏳ Time: <span id="timer">30</span>
+  <div id="goalMessage">🎯 Goal: Catch 20 gifts in 30 seconds!</div>
+</div>
+
+    <div id="messageBox"></div>
+    <div id="giftForm">
+      <h2>🎁 Choose Your Gift!</h2>
+      <p>Type what you want inside the box:</p>
+      <input type="text" id="wishInput" placeholder="I want..." />
+      <br />
+      <button onclick="submitWish()">Send Wish</button>
+    </div>
+    <div id="restartBox" style="display: none; text-align: center; margin-top: 20px;">
+  <button onclick="restartGame()" id="restartBtn">🔁 Restart Game</button>
+</div>
+
+  </div>
+
+<script>
+  const gameArea = document.getElementById("gameArea");
+  const scoreDisplay = document.getElementById("score");
+  const timerDisplay = document.getElementById("timer");
+  const messageBox = document.getElementById("messageBox");
+  const giftForm = document.getElementById("giftForm");
+
+  let score = 0;
+  let timeLeft = 30;
+  let gameRunning = true;
+
+  function spawnGift() {
+    if (!gameRunning) return;
+
+    const gift = document.createElement("div");
+    gift.classList.add("gift");
+
+    const randomX = Math.random() * (window.innerWidth - 80);
+    gift.style.left = `${randomX}px`;
+
+    function handleCatch() {
+      if (!gameRunning) return;
+      score++;
+      scoreDisplay.textContent = score;
+      gift.remove();
+    }
+
+    gift.addEventListener("click", handleCatch);
+    gift.addEventListener("mouseover", handleCatch); // for mobile
+
+    gameArea.appendChild(gift);
+
+    setTimeout(() => {
+      if (gameArea.contains(gift)) gift.remove();
+    }, 3000); // slower gift fall
+  }
+
+  function endGame(win) {
+    gameRunning = false;
+    clearInterval(giftInterval);
+    clearInterval(countdown);
+
+    if (win) {
+      messageBox.textContent = "🎉 You Win, Gudi! Choose your gift below 🎁";
+      messageBox.style.display = "block";
+      setTimeout(() => {
+        messageBox.style.display = "none";
+        giftForm.style.display = "block";
+     
+      }, 3000);
+    } else {
+      messageBox.innerHTML = ` ⏳ Time’s up! Try again, my Rakhi Rockstar! 💌
+    <br><br><button onclick="restartGame()" id="restartBtn">🔁 Restart Game</button>`;
+      messageBox.style.display = "block";
+    }
+  }
+
+  function submitWish() {
+    const wish = document.getElementById("wishInput").value.trim();
+    if (wish === "") {
+      alert("Please type your gift wish!");
+      return;
+    }
+
+    const message = `🎁 Gudi has chosen her gift:\n"${wish}"`;
+    const botToken = "8119975936:AAGZ68RkcEeccUwAvDJ_4QyFLaAsM0ZYvPQ";
+    const chatId = "5707502875";
+
+    fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+      }),
+    }).then(() => {
+ giftForm.innerHTML = `
+  <h2>🎉 Your wish has been sent!</h2>
+  <p>Subhu will surprise you soon! 💝</p>
+  <button onclick="restartGame()" id="restartBtn">🔁 Restart Game</button>
+`;
+
+    }).catch(() => {
+      alert("Failed to send message. Please try again.");
+    });
+  }
+
+  function restartGame() {
+    location.reload(); // reloads the page
+  }
+
+  const giftInterval = setInterval(spawnGift, 500); // easier game
+  const countdown = setInterval(() => {
+    timeLeft--;
+    timerDisplay.textContent = timeLeft;
+    if (timeLeft <= 0) endGame(score >= 20);
+  }, 1000);
+</script>
+</body>
+</html>
